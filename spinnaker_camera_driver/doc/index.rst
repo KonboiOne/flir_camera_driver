@@ -80,32 +80,32 @@ Building from source
 2) Prepare the ROS2 driver build: Make sure you have your ROS2
    environment sourced:
 
-::
+   ::
 
-   source /opt/ros/<my_ros_distro>/setup.bash
+    source /opt/ros/<my_ros_distro>/setup.bash
 
-Create a workspace (``~/ws``), clone this repo:
+   Create a workspace (``~/ws``), clone this repo:
 
-::
+   ::
 
-   mkdir -p ~/ws/src
-   cd ~/ws/src
-   git clone --branch humble-devel https://github.com/ros-drivers/flir_camera_driver
-   cd ..
+    mkdir -p ~/ws/src
+    cd ~/ws/src
+    git clone --branch humble-devel https://github.com/ros-drivers/flir_camera_driver
+    cd ..
 
-To automatically install all packages that the ``flir_camera_driver``
-packages depends upon, run this at the top of your workspace:
+   To automatically install all packages that the ``flir_camera_driver``
+   packages depends upon, run this at the top of your workspace:
 
-::
+   ::
 
-   rosdep install --from-paths src --ignore-src
+    rosdep install --from-paths src --ignore-src
 
 3) Build the driver and source the workspace:
 
-::
+   ::
 
-   colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-   . install/setup.bash
+    colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    . install/setup.bash
 
 How to use
 ==========
@@ -122,7 +122,7 @@ Published:
 Subscribed:
 
 - ``~/control``: (only when ``enable_external_control`` is set to True)
-   for external control exposure time and gain.
+  for external control exposure time and gain.
 
 Parameters
 ----------
@@ -287,9 +287,13 @@ subnet mask of 255.255.0.0).
 To check if the MTU settings are working correctly on the host you
 can ping with large packet size from a different host on the same
 network (must also have a MTU of 9000):
-```
-ping <host_ip_address> -c 2 -M do -s 8972
-```
+
+::
+
+ ping <host_ip_address> -c 2 -M do -s 8972
+
+Note that this will *not* work if you ping the camera: you will find
+a MTU size of 1500, even if both camera and host NIC have correct MTU setting.
 Beware that some network cards have `bugs that mess up the MTU when
 running ptp4l <https://www.reddit.com/r/networking/comments/1ebvj5y/linux_ptp_and_jumbo_frames_for_gige_vision/>`__.
 
@@ -356,7 +360,7 @@ Once the camera gets PTP packets it will eventually accept the host's PHC as mas
 
 Note that once a camera has been up and running for a while it can be very reluctant to accept PTP message from a master and switch from listener (``LIS``) to Slave (``SLV``) mode. Power cycle the camera (disconnect the GigE/POE cable) to fix this. Best practice is to have the master clock running already before starting the camera.
 
-**Monitor the offset for a while!**. If the system clock of the host that is running the driver is not disciplined by the master PHC then the offset will keep drifting. Make sure that something keeps the system clock synchronized with the PHC.
+**Monitor the offset for a while!** If the system clock of the host that is running the driver is not disciplined by the master PHC then the offset will keep drifting. Make sure that something keeps the system clock synchronized with the PHC.
 
 
 
@@ -375,7 +379,7 @@ comes with the Spinnaker SDK. Once you know what property you want to
 expose as a ROS parameter, you add a mapping entry to the yaml
 configuration file, e.g.:
 
-.. code::
+::
 
      - name: image_width
        type: int
@@ -391,7 +395,7 @@ integers because their values are restricted to a set of strings. Any
 other strings will be rejected by the Spinnaker API. Please document the
 valid enum strings in the configuration file, e.g.:
 
-.. code::
+::
 
      - name: line1_linemode  # valid values: "Input", "Output"
        type: enum
@@ -435,7 +439,7 @@ Troubleshooting/Common Issues
 
 2) Driver doesn't publish images and/or warns about incomplete images for GigE cameras
 
-   .. code::
+   ::
 
       rate [Hz] in  39.76 out   0.00 drop   0% INCOMPLETE 100%
 
@@ -458,11 +462,11 @@ Troubleshooting/Common Issues
 
 6) GigE camera cannot be initialized:
 
-.. code::
+   ::
 
-   [19074765]: found camera with serial number: 19074765
-   [Spinnaker Wrapper]: Could not initialize camera on any interface!
-   [Spinnaker Wrapper]: failed attempt on interface: GEV Interface 1
+    [19074765]: found camera with serial number: 19074765
+    [Spinnaker Wrapper]: Could not initialize camera on any interface!
+    [Spinnaker Wrapper]: failed attempt on interface: GEV Interface 1
 
    Either the IP address of your camera is out-of-network (switch it to
    DHCP using SpinView) or another application (SpinView?) is
@@ -476,56 +480,58 @@ your machine.
 
 1) Somewhere in your ``.bashrc`` file, set the following env variable:
 
-.. code::
+ ::
 
    export SPINNAKER_GENTL64_CTI=/opt/ros/${ROS_DISTRO}/lib/spinnaker-gentl/Spinnaker_GenTL.cti
 
 2) Add the “flirimaging” group and make yourself a member of it
 
-.. code::
+ ::
 
    sudo addgroup flirimaging
    sudo usermod -a -G flirimaging ${USER}
 
 3) Bump the usbfs memory limits
 
-The following was taken from
-`here <https://www.flir.com/support-center/iis/machine-vision/application-note/using-linux-with-usb-3.1/>`__.
-Edit the file ``/etc/default/grub`` and change the line default to:
+   The following was taken from
+   `here <https://www.flir.com/support-center/iis/machine-vision/application-note/using-linux-with-usb-3.1/>`__.
+   Edit the file ``/etc/default/grub`` and change the line default to:
 
-::
+   ::
 
-   GRUB_CMDLINE_LINUX_DEFAULT="quiet splash usbcore.usbfs_memory_mb=1000"
+    GRUB_CMDLINE_LINUX_DEFAULT="quiet splash usbcore.usbfs_memory_mb=1000"
 
-Then
+   Then
 
-::
+   ::
 
-   sudo update-grub
+    sudo update-grub
 
-If your system does not have ``/etc/default/grub``, create the file
-``/etc/rc.local``, and change its permissions to ‘executable’. Then
-write the following text to it:
+   If your system does not have ``/etc/default/grub``, create the file
+   ``/etc/rc.local``, and change its permissions to ‘executable’. Then
+   write the following text to it:
 
-::
+   ::
 
-   #!/bin/sh -e
-   sh -c 'echo 1000 > /sys/module/usbcore/parameters/usbfs_memory_mb'
-
-   exit 0
+    #!/bin/sh -e
+    sh -c 'echo 1000 > /sys/module/usbcore/parameters/usbfs_memory_mb'
+    exit 0
 
 4) Setup udev rules
 
-.. code::
+   ::
 
-   echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="1e10", GROUP="flirimaging"' | sudo tee -a /etc/udev/rules.d/40-flir-spinnaker.rules
-   echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="1724", GROUP="flirimaging"' | sudo tee -a /etc/udev/rules.d/40-flir-spinnaker.rules
-   sudo service udev restart
-   sudo udevadm trigger
+    echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="1e10", GROUP="flirimaging"' | sudo tee -a /etc/udev/rules.d/40-flir-spinnaker.rules
+    echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="1724", GROUP="flirimaging"' | sudo tee -a /etc/udev/rules.d/40-flir-spinnaker.rules
+    sudo service udev restart
+    sudo udevadm trigger
 
 5) Logout and log back in (or better, reboot)
 
-``sudo reboot``
+   ::
+
+    sudo reboot
+
 
 
 How to contribute
@@ -542,7 +548,7 @@ some basic lint tests:
 
 ::
 
-   colcon test --packages-select spinnaker_camera_driver && colcon test-result --verbose
+ colcon test --packages-select spinnaker_camera_driver && colcon test-result --verbose
 
 
 License
