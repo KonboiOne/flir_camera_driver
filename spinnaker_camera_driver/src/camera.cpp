@@ -761,6 +761,13 @@ bool Camera::start()
       std::string nm = wrapper_->getNodeMapAsString();
       std::cout << nm;
     }
+
+    // Ugly hack allowing to reset camera internal pipeline
+    // This workarounds greenish color image
+    if (!setEnum("ImageFormatControl/PixelFormat", "Mono8")) {
+      LOG_ERROR("Pixel format workaround has failed")
+    }
+
     // Must first create the camera parameters before acquisition is started.
     // Some parameters (like blackfly s chunk control) cannot be set once
     // the camera is running.
