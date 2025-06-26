@@ -197,7 +197,7 @@ void Camera::printStatus()
       (useIEEE1588_ && (ptpOffset_ > maxIEEE1588Offset_ || ptpOffset_ < minIEEE1588Offset_))) {
       LOG_WARN(ss.str());
     } else {
-      LOG_INFO(ss.str());
+      LOG_DEBUG(ss.str());
     }
 
     lastStatusTime_ = t;

@@ -31,6 +31,11 @@
   {                                                \
     RCLCPP_INFO_STREAM(get_logger(), __VA_ARGS__); \
   }
+#define LOG_DEBUG(...)                              \
+  {                                                 \
+    RCLCPP_DEBUG_STREAM(get_logger(), __VA_ARGS__); \
+  }
+
 #define LOG_INFO_FMT(...)                   \
   {                                         \
     RCLCPP_INFO(get_logger(), __VA_ARGS__); \
