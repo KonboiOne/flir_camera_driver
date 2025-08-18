@@ -17,6 +17,7 @@
 #define SPINNAKER_CAMERA_DRIVER__CAMERA_HPP_
 
 #include <camera_info_manager/camera_info_manager.hpp>
+#include <cstdint>
 #include <deque>
 #include <flir_camera_msgs/msg/camera_control.hpp>
 #include <flir_camera_msgs/msg/image_meta_data.hpp>
@@ -26,6 +27,7 @@
 #include <memory>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
+#include <sensor_msgs/msg/compressed_image.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <spinnaker_camera_driver/image.hpp>
 #include <spinnaker_camera_driver/spinnaker_wrapper.hpp>
@@ -127,6 +129,7 @@ private:
   rclcpp::Node * node_;
   image_transport::ImageTransport * imageTransport_;
   image_transport::CameraPublisher pub_;
+  rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr compressed_pub_;
   rclcpp::Publisher<flir_camera_msgs::msg::ImageMetaData>::SharedPtr metaPub_;
   std::string serial_;
   std::string name_;
@@ -178,6 +181,7 @@ private:
   std::shared_ptr<Synchronizer> synchronizer_;
   std::shared_ptr<ExposureController> exposureController_;
   bool firstSynchronizedFrame_{true};
+  std::vector<std::uint8_t> jpeg_buffer_;
 };
 }  // namespace spinnaker_camera_driver
 #endif  // SPINNAKER_CAMERA_DRIVER__CAMERA_HPP_

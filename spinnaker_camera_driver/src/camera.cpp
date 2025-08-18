@@ -22,6 +22,7 @@
 #include <image_transport/image_transport.hpp>
 #include <iomanip>
 #include <iostream>
+#include <opencv2/opencv.hpp>
 #include <sensor_msgs/fill_image.hpp>
 #include <sensor_msgs/image_encodings.hpp>
 #include <spinnaker_camera_driver/camera_driver.hpp>
@@ -639,7 +640,9 @@ void Camera::doPublish(const ImageConstPtr & im)
   imageMsg_.header.stamp = t;
   cameraInfoMsg_.header.stamp = t;
 
-  if (pub_.getNumSubscribers() > 0) {
+  const auto want_compressed = compressed_pub_->get_subscription_count() > 0;
+
+  if ((pub_.getNumSubscribers() > 0) || want_compressed) {
     bool canEncode{false};
     const std::string encoding = flir_to_ros_encoding(im->pixelFormat_, &canEncode);
     if (!canEncode) {
@@ -658,6 +661,25 @@ void Camera::doPublish(const ImageConstPtr & im)
       LOG_ERROR("fill image failed!");
     } else {
       // const auto t0 = node_->now();
+      if (want_compressed) {
+        // Wrap raw ROS image data in cv::Mat (no copy)
+        cv::Mat cv_img(
+          img->height, img->width, CV_8UC3, const_cast<unsigned char *>(img->data.data()),
+          img->step);
+
+        // Encode directly to JPEG
+        jpeg_buffer_.clear();
+        cv::imencode(".jpg", cv_img, jpeg_buffer_, {cv::IMWRITE_JPEG_QUALITY, 80});
+
+        // Publish compressed image
+        sensor_msgs::msg::CompressedImage out_msg;
+        out_msg.header = img->header;
+        out_msg.format = "jpeg";
+        out_msg.data = jpeg_buffer_;
+
+        compressed_pub_->publish(out_msg);
+      }
+
       pub_.publish(std::move(img), std::move(cinfo));
       // const auto t1 = node_->now();
       // std::cout << "dt: " << (t1 - t0).nanoseconds() * 1e-9 << std::endl;
@@ -724,6 +746,8 @@ bool Camera::start()
   metaMsg_.header.frame_id = frameId_;
 
   pub_ = imageTransport_->advertiseCamera("~/" + topicPrefix_ + "image_raw", qosDepth_);
+  compressed_pub_ = node_->create_publisher<sensor_msgs::msg::CompressedImage>(
+    "~/" + topicPrefix_ + "image_compressed", 1);
 
   wrapper_ = std::make_shared<spinnaker_camera_driver::SpinnakerWrapper>();
   wrapper_->setDebug(debug_);

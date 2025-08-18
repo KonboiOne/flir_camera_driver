@@ -74,6 +74,7 @@ find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(OpenCV REQUIRED)
 
 include_directories(SYSTEM
   ${SPINNAKER_INCLUDE_DIRS})
@@ -105,6 +106,8 @@ add_library(camera_driver SHARED
 
 target_link_libraries(camera_driver
   PUBLIC
+  opencv_core
+  opencv_imgcodecs
   ${ROS_DEPENDENCIES}
   yaml-cpp
   PRIVATE
