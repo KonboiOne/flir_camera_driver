@@ -34,6 +34,11 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 find_package(spinnaker_camera_driver REQUIRED)
+# spinnaker_camera_driver's own CMakeLists.txt links its camera_driver
+# target PUBLIC against bare "opencv_core"/"opencv_imgcodecs" names rather
+# than full OpenCV:: targets; those only resolve here if OpenCV's own
+# imported targets already exist in this scope too.
+find_package(OpenCV REQUIRED)
 # list of all packages that use ament for export (may work for others too)
 
 # find dependencies
